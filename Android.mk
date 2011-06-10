@@ -41,10 +41,20 @@ endif
 
 LOCAL_SHARED_LIBRARIES := libsysutils libcutils libnetutils libcrypto
 
+ifdef BOARD_WLAN_ATHEROS_SDK
+LOCAL_SHARED_LIBRARIES += libhostapd_client
+LOCAL_CFLAGS += -DATH_SDK
+endif
+
 ifeq ($(BOARD_HAVE_BLUETOOTH),true)
   LOCAL_SHARED_LIBRARIES := $(LOCAL_SHARED_LIBRARIES) libbluedroid
   LOCAL_CFLAGS := $(LOCAL_CFLAGS) -DHAVE_BLUETOOTH
 endif
+
+ifneq (, $(filter a1 a3 a4, $(TARGET_DEVICE)))
+  LOCAL_CFLAGS += -DENABLE_OLDSTYLE_USB
+endif
+
 
 include $(BUILD_EXECUTABLE)
 

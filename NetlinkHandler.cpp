@@ -27,9 +27,12 @@
 #include "NetlinkManager.h"
 #include "ResponseCode.h"
 
+/* Save the pointer to NetlinkHander to indicate interface change events */
+NetlinkManager *pNm;
 NetlinkHandler::NetlinkHandler(NetlinkManager *nm, int listenerSocket) :
                 NetlinkListener(listenerSocket) {
     mNm = nm;
+    pNm = nm;
 }
 
 NetlinkHandler::~NetlinkHandler() {
@@ -86,5 +89,16 @@ void NetlinkHandler::notifyInterfaceChanged(const char *name, bool isUp) {
     snprintf(msg, sizeof(msg), "Iface is %s %s", (isUp ? "up" : "down"), name);
 
     mNm->getBroadcaster()->sendBroadcast(ResponseCode::InterfaceChange,
+            msg, false);
+}
+/*
+ * Indicate interface changed.
+ * Tethering state machine look for this events.
+ */
+void apNotifyInterfaceChanged(const char *name, bool isUp) {
+    char msg[255];
+    snprintf(msg, sizeof(msg), "Iface changed %s %s", name, (isUp ? "up" : "down"));
+
+    pNm->getBroadcaster()->sendBroadcast(ResponseCode::InterfaceChange,
             msg, false);
 }
